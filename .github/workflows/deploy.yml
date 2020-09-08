@@ -48,4 +48,4 @@ jobs:
           script: |
             docker login docker.pkg.github.com -u ${{ github.actor }} -p '${{ secrets.GITHUB_TOKEN }}'
             docker pull docker.pkg.github.com/kuic-sena/servidor/aurelia:latest
-            docker run --name aspnetapp -p 80:80 -d --env-file /home/.env --rm docker.pkg.github.com/kuic-sena/servidor/aurelia
+            docker run --name aspnetapp -p 80:80 -d --env-file /home/.env --rm docker.pkg.github.com/kuic-sena/servidor/aurelia:latest
