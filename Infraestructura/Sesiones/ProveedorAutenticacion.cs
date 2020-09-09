@@ -28,7 +28,7 @@ namespace Infraestructura.Sesiones
 
         private async Task<AuthenticationState> GetAuthenticationState()
         {
-            var status = new AuthenticationState(new ClaimsPrincipal());
+            var emptyStatus = new AuthenticationState(new ClaimsPrincipal());
 
             try
             {
@@ -38,35 +38,30 @@ namespace Infraestructura.Sesiones
                 {
                     http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("bearer", token);
 
-                    var user = await http.GetFromJsonAsync<Usuario>("/api/sesion");
-                    var service = new ServicioSesion();
+                    var response = await http.GetAsync("/api/sesion");
 
-                    var identity = service.GenerarIdentidad(user);
-                    status = new AuthenticationState(identity);
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var user = await response.Content.ReadFromJsonAsync<Usuario>();
+                        var service = new ServicioSesion();
+
+                        var identity = service.GenerarIdentidad(user);
+                        return new AuthenticationState(identity);
+                    }
                 }
+
+                return emptyStatus;
             }
 
             catch
             {
-#if DEBUG
-                throw;
-#endif
+                return emptyStatus;
             }
-
-            return status;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            try
-            {
-                return await GetAuthenticationState();
-            }
-
-            catch
-            {
-                return new AuthenticationState(new ClaimsPrincipal());
-            }
+            return await GetAuthenticationState();
         }
 
         public async Task SignIn(string documento, string clave)
