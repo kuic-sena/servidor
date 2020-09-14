@@ -1,17 +1,82 @@
 ﻿@layout AppLayout
 
 @inject AuthenticationStateProvider authProvider
+@inject HttpClient http
 
 @using Infraestructura.Sesiones
 
-<h1>Hola @(Usuario?.Nombre ?? "anonimo")!</h1>
+<h1 class="subtitle is-1">Hola <b>@(Usuario?.Nombre ?? "humano")</b>!</h1>
+
+<div class="columns">
+    <div class="column">
+        <div class="box">
+            <div class="heading">Pedidos pendientes</div>
+            <p class="title is-1">@textoPedidosPendientes</p>
+        </div>
+    </div>
+
+    <div class="column">
+        <div class="box">
+            <div class="heading">Bandeja de entrada</div>
+            <p class="title is-1">@textoNotificaciones</p>
+        </div>
+    </div>
+
+    <div class="column">
+        <div class="box">
+            <div class="heading">Último ingreso (días)</div>
+            <p class="title is-1">@textoUltimoIngreso</p>
+        </div>
+    </div>
+</div>
 
 @code {
     private Usuario Usuario;
+
+    private string textoPedidosPendientes = "-";
+    private string textoNotificaciones = "-";
+    private string textoUltimoIngreso = "-";
 
     protected override async Task OnInitializedAsync()
     {
         var provider = (ProveedorAutenticacion) authProvider;
         Usuario = await provider.GetUserAsync();
+
+        await EscribirPedidosPendientes();
+        await EscribirNotificacionesEntrada();
+        await EscribirDiasUltimoIngreso();
+    }
+
+    private async Task EscribirPedidosPendientes()
+    {
+        var listado = await http.GetFromJsonAsync<Pedido[]>("/api/pedido/pendiente");
+        textoPedidosPendientes = listado.Length.ToString();
+    }
+
+    private async Task EscribirNotificacionesEntrada()
+    {
+        var notificaciones = await http.GetFromJsonAsync<Notificacion[]>("/api/notificacion");
+        textoNotificaciones = notificaciones.Length.ToString();
+    }
+
+    private async Task EscribirDiasUltimoIngreso()
+    {
+        var ingresos = await http.GetFromJsonAsync<Entrada[]>("/api/entrada");
+        var ultimoIngreso = ingresos.Last();
+
+        if (ultimoIngreso is Entrada)
+        {
+            var diferencia = ultimoIngreso.Fecha - DateTime.Now;
+
+            if (diferencia.Days <= 0)
+            {
+                textoUltimoIngreso = "Hoy";
+            }
+
+            else
+            {
+                textoUltimoIngreso = diferencia.Days.ToString();
+            }
+        }
     }
 }
