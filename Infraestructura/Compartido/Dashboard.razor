@@ -8,26 +8,51 @@
 <h1 class="subtitle is-1">Hola <b>@(Usuario?.Nombre ?? "humano")</b>!</h1>
 
 <div class="columns">
-    <div class="column">
-        <div class="box">
-            <div class="heading">Pedidos pendientes</div>
-            <p class="title is-1">@textoPedidosPendientes</p>
+    <AuthorizeView Roles="pedidos">
+        <div class="column">
+            <div class="box">
+                <div class="heading">Pedidos pendientes</div>
+                <div class="media">
+                    <div class="media-left">
+                        <box-icon name="purchase-tag" size="2.6em"></box-icon>
+                    </div>
+                    <div class="media-content">
+                        <p class="title is-1">@textoPedidosPendientes</p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </AuthorizeView>
 
     <div class="column">
         <div class="box">
             <div class="heading">Bandeja de entrada</div>
-            <p class="title is-1">@textoNotificaciones</p>
+            <div class="media">
+                <div class="media-left">
+                    <box-icon name="notification" size="2.6em"></box-icon>
+                </div>
+                <div class="media-content">
+                    <p class="title is-1">@textoNotificaciones</p>
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="column">
-        <div class="box">
-            <div class="heading">Último ingreso (días)</div>
-            <p class="title is-1">@textoUltimoIngreso</p>
+    <AuthorizeView Roles="logistica">
+        <div class="column">
+            <div class="box">
+                <div class="heading">Último ingreso (días)</div>
+                <div class="media">
+                    <div class="media-left">
+                        <box-icon name="history" size="2.6em"></box-icon>
+                    </div>
+                    <div class="media-content">
+                        <p class="title is-1">@textoUltimoIngreso</p>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </AuthorizeView>
 </div>
 
 @code {
