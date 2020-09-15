@@ -55,6 +55,76 @@
     </AuthorizeView>
 </div>
 
+<AuthorizeView Roles="logistica">
+    <div class="level">
+        <span></span>
+        <div class="level-right">
+            <a href="/inventario">Ir a inventario</a>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="table is-fullwidth is-hoverable">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Existencias</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!(productosConMenosExistencias is null))
+                {
+                    @foreach (var producto in productosConMenosExistencias)
+                    {
+                        <tr>
+                            <td>@producto.Codigo</td>
+                            <td>@producto.Nombre</td>
+                            <td><b>@producto.Existencias</b></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</AuthorizeView>
+
+<AuthorizeView Roles="pedidos">
+    <div class="level">
+        <span></span>
+        <div class="level-right">
+            <a href="/pedido">Ir a pedidos</a>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="table is-fullwidth is-hoverable">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Observacion</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!(pedidosPendientes is null))
+                {
+                    @foreach (var pedido in pedidosPendientes)
+                    {
+                        <tr>
+                            <td>@pedido.Fecha</td>
+                            <td>@pedido.Estado</td>
+                            <td>@pedido.Observacion</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</AuthorizeView>
+
 @code {
     private Usuario Usuario;
 
@@ -62,20 +132,30 @@
     private string textoNotificaciones = "-";
     private string textoUltimoIngreso = "-";
 
+    private Producto[] productosConMenosExistencias;
+    private Pedido[] pedidosPendientes;
+
     protected override async Task OnInitializedAsync()
     {
         var provider = (ProveedorAutenticacion) authProvider;
         Usuario = await provider.GetUserAsync();
 
         await EscribirPedidosPendientes();
+        await EscribirProductosConMenosExistencias();
         await EscribirNotificacionesEntrada();
         await EscribirDiasUltimoIngreso();
     }
 
+    private async Task EscribirProductosConMenosExistencias()
+    {
+        var listado = await http.GetFromJsonAsync<Producto[]>("/api/producto");
+        productosConMenosExistencias = listado.Where(p => p.Existencias < 50).ToArray();
+    }
+
     private async Task EscribirPedidosPendientes()
     {
-        var listado = await http.GetFromJsonAsync<Pedido[]>("/api/pedido/pendiente");
-        textoPedidosPendientes = listado.Length.ToString();
+        pedidosPendientes = await http.GetFromJsonAsync<Pedido[]>("/api/pedido/pendiente");
+        textoPedidosPendientes = pedidosPendientes.Length.ToString();
     }
 
     private async Task EscribirNotificacionesEntrada()
