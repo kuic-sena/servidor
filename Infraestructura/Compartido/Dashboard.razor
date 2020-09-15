@@ -148,40 +148,73 @@
 
     private async Task EscribirProductosConMenosExistencias()
     {
-        var listado = await http.GetFromJsonAsync<Producto[]>("/api/producto");
-        productosConMenosExistencias = listado.Where(p => p.Existencias < 50).ToArray();
+        try
+        {
+            var listado = await http.GetFromJsonAsync<Producto[]>("/api/producto");
+            productosConMenosExistencias = listado.Where(p => p.Existencias < 50).ToArray();
+        }
+
+        catch
+        {
+            productosConMenosExistencias = new Producto[];
+        }
     }
 
     private async Task EscribirPedidosPendientes()
     {
-        pedidosPendientes = await http.GetFromJsonAsync<Pedido[]>("/api/pedido/pendiente");
-        textoPedidosPendientes = pedidosPendientes.Length.ToString();
+        try
+        {
+            pedidosPendientes = await http.GetFromJsonAsync<Pedido[]>("/api/pedido/pendiente");
+            textoPedidosPendientes = pedidosPendientes.Length.ToString();
+        }
+
+        catch
+        {
+            pedidosPendientes = new Pedido[];
+            textoPedidosPendientes = "-";
+        }
     }
 
     private async Task EscribirNotificacionesEntrada()
     {
-        var notificaciones = await http.GetFromJsonAsync<Notificacion[]>("/api/notificacion");
-        textoNotificaciones = notificaciones.Length.ToString();
+        try
+        {
+            var notificaciones = await http.GetFromJsonAsync<Notificacion[]>("/api/notificacion");
+            textoNotificaciones = notificaciones.Length.ToString();
+        }
+
+        catch
+        {
+            textoNotificaciones = "-";
+        }
     }
 
     private async Task EscribirDiasUltimoIngreso()
     {
-        var ingresos = await http.GetFromJsonAsync<Entrada[]>("/api/entrada");
-        var ultimoIngreso = ingresos.Last();
-
-        if (ultimoIngreso is Entrada)
+        try
         {
-            var diferencia = ultimoIngreso.Fecha - DateTime.Now;
+            var ingresos = await http.GetFromJsonAsync<Entrada[]>("/api/entrada");
+            var ultimoIngreso = ingresos.Last();
 
-            if (diferencia.Days <= 0)
+            if (ultimoIngreso is Entrada)
             {
-                textoUltimoIngreso = "Hoy";
-            }
+                var diferencia = ultimoIngreso.Fecha - DateTime.Now;
 
-            else
-            {
-                textoUltimoIngreso = diferencia.Days.ToString();
+                if (diferencia.Days <= 0)
+                {
+                    textoUltimoIngreso = "Hoy";
+                }
+
+                else
+                {
+                    textoUltimoIngreso = diferencia.Days.ToString();
+                }
             }
+        }
+
+        catch
+        {
+            textoUltimoIngreso = "-";
         }
     }
 }
